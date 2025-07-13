@@ -91,70 +91,206 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Enter Your Details'),
-        backgroundColor: Theme.of(context).primaryColor,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Icon(
-              Icons.chat_bubble_outline_rounded,
-              size: 80,
-              color: Theme.of(context).primaryColor,
-            ),
-            const SizedBox(height: 40),
-            TextField(
-              controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: 'Display Name',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.person),
+      backgroundColor: Colors.black,
+      body: Stack(
+        children: [
+          // Gradient background
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF232526), Color(0xFF414345)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
             ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _mobileController,
-              decoration: const InputDecoration(
-                labelText: 'Mobile Number',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.phone),
-              ),
-              keyboardType: TextInputType.phone,
-            ),
-            const SizedBox(height: 30),
-            SizedBox(
-              height: 50,
-              child: ElevatedButton(
-                onPressed: _isLoading ? null : _login,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.secondary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Text(
-                  'Login / Register',
-                  style: TextStyle(fontSize: 18, color: Colors.white),
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            if (_isLoading)
-              const Center(child: CircularProgressIndicator()),
-            if (_errorMessage != null)
-              Center(
-                child: Text(
-                  _errorMessage!,
-                  style: const TextStyle(color: Colors.red, fontSize: 14),
-                ),
-              ),
-          ],
-        ),
+          ),
+          // Decorative glowing circles
+          Positioned(
+            top: -60,
+            left: -60,
+            child: _buildGlowingCircle(180, Colors.deepPurpleAccent.withOpacity(0.35)),
+          ),
+          Positioned(
+            bottom: -40,
+            right: -40,
+            child: _buildGlowingCircle(120, Colors.blueAccent.withOpacity(0.25)),
+          ),
+          // Glassmorphism login card
+          Center(
+            child: _buildLoginCard(context),
+          ),
+        ],
       ),
     );
   }
+
+  Widget _buildGlowingCircle(double size, Color color) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: color,
+        boxShadow: [
+          BoxShadow(
+            color: color,
+            blurRadius: 60,
+            spreadRadius: 10,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoginCard(BuildContext context) {
+    return Container(
+      width: 370,
+      padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 28),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.07),
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.25),
+            blurRadius: 30,
+            offset: const Offset(0, 10),
+          ),
+        ],
+        border: Border.all(
+          color: Colors.white.withOpacity(0.18),
+          width: 1.5,
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // App Icon
+          Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: LinearGradient(
+                colors: [Colors.deepPurpleAccent, Colors.blueAccent],
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.deepPurpleAccent.withOpacity(0.6),
+                  blurRadius: 18,
+                  spreadRadius: 2,
+                ),
+              ],
+            ),
+            padding: const EdgeInsets.all(14),
+            child: const Icon(
+              Icons.chat_bubble_rounded,
+              size: 54,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 24),
+          // Title
+          Text(
+            'Welcome Back',
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.95),
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.2,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Login to continue',
+            style: TextStyle(
+              color: Colors.white70,
+              fontSize: 16,
+            ),
+          ),
+          const SizedBox(height: 32),
+          // Name Field
+          _buildDarkTextField(
+            controller: _nameController,
+            hint: 'Display Name',
+            icon: Icons.person,
+          ),
+          const SizedBox(height: 18),
+          // Mobile Field
+          _buildDarkTextField(
+            controller: _mobileController,
+            hint: 'Mobile Number',
+            icon: Icons.phone,
+            keyboardType: TextInputType.phone,
+          ),
+          const SizedBox(height: 28),
+          // Gradient Button
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: InkWell(
+              onTap: _isLoading ? null : _login,
+              borderRadius: BorderRadius.circular(16),
+              child: Ink(
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF7F53AC), Color(0xFF647DEE)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Center(
+                  child: _isLoading
+                      ? const CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        )
+                      : const Text(
+                          'Login / Register',
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 1.1,
+                          ),
+                        ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 18),
+          // Error Message
+          if (_errorMessage != null)
+            Text(
+              _errorMessage!,
+              style: const TextStyle(color: Colors.redAccent, fontSize: 15),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDarkTextField({
+    required TextEditingController controller,
+    required String hint,
+    required IconData icon,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
+    return TextField(
+      controller: controller,
+      keyboardType: keyboardType,
+      style: const TextStyle(color: Colors.white),
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: Colors.white.withOpacity(0.10),
+        hintText: hint,
+        hintStyle: const TextStyle(color: Colors.white54),
+        prefixIcon: Icon(icon, color: Colors.white70),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide.none,
+        ),
+        contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 18),
+      ),
+    );
+  }
+
+
 }
