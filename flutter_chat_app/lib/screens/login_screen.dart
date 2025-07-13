@@ -2,7 +2,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
-import 'main.dart'; // Import to navigate to ChatsListScreen
+import '../../screens/chats_list_screen.dart'; 
+
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});

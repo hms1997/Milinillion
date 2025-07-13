@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'main.dart';
 import 'login_screen.dart'; // Import to navigate to LoginScreen
+import '../../screens/chats_list_screen.dart'; 
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -125,8 +125,8 @@ class GlowingRingPainter extends CustomPainter {
         endAngle: 2 * pi,
         colors: [
           Colors.transparent,
-          Colors.blueAccent.withOpacity(0.8),
-          Colors.blue.withOpacity(0.5),
+          Colors.blueAccent.withValues(alpha: 0.8),
+          Colors.blue.withValues(alpha: 0.5),
           Colors.transparent,
         ],
         stops: [0.0, 0.2, 0.5, 1.0],

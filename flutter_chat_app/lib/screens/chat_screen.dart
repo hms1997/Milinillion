@@ -3,9 +3,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:cached_network_image/cached_network_image.dart';
-import 'main.dart';
-import 'websocket_service.dart';
+import '../services/websocket_service.dart';
 import 'package:provider/provider.dart';
+import '../../models/conversation.dart';
 
 // Formats the timestamp for message bubbles
 String formatMessageTime(BuildContext context, DateTime timestamp) {
