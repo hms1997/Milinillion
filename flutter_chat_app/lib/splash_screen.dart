@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'main.dart';
+import 'login_screen.dart'; // Import to navigate to LoginScreen
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -15,6 +17,7 @@ class _SplashScreenState extends State<SplashScreen>
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
+  final _storage = const FlutterSecureStorage();
 
   @override
   void initState() {
@@ -33,11 +36,30 @@ class _SplashScreenState extends State<SplashScreen>
       CurvedAnimation(parent: _controller, curve: const Interval(0.0, 0.5, curve: Curves.easeOut)),
     );
 
-    Timer(const Duration(seconds: 3), () {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const ChatsListScreen()),
-      );
-    });
+    // ✅ Check authentication status after the animation
+    Timer(const Duration(seconds: 3), _checkAuthStatus);
+  }
+
+  Future<void> _checkAuthStatus() async {
+    // Try to read the token and user ID from secure storage
+    final token = await _storage.read(key: 'jwt_token');
+    final userId = await _storage.read(key: 'user_id');
+
+    if (mounted) {
+      if (token != null && userId != null) {
+        // If we have a token, go directly to the chat list
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => ChatsListScreen(token: token, currentUserId: userId),
+          ),
+        );
+      } else {
+        // If no token, go to the login screen
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
+        );
+      }
+    }
   }
 
   @override

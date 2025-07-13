@@ -18,6 +18,8 @@ dependencies:
   intl: ^0.20.2 # Add this line
   provider: ^6.1.2
   flutter_native_splash: ^2.4.6
+  # ✅ Add this package for secure data persistence
+  flutter_secure_storage: ^9.2.4
   
 
   cupertino_icons: ^1.0.8

@@ -8,6 +8,7 @@ import 'websocket_service.dart';
 import 'package:provider/provider.dart';
 import 'splash_screen.dart'; // ✅ Import the new splash screen file
 
+
 // Helper function to format the timestamp
 String formatTimestamp(BuildContext context, DateTime timestamp) {
   final now = DateTime.now();
@@ -67,8 +68,13 @@ class MyApp extends StatelessWidget {
   }
 }
 
+// This screen now receives the token and user ID as parameters.
+// It no longer handles login itself.
 class ChatsListScreen extends StatefulWidget {
-  const ChatsListScreen({super.key});
+  final String token;
+  final String currentUserId;
+  const ChatsListScreen({super.key, required this.token, required this.currentUserId});
+
   @override
   State<ChatsListScreen> createState() => _ChatsListScreenState();
 }
@@ -76,22 +82,22 @@ class ChatsListScreen extends StatefulWidget {
 class _ChatsListScreenState extends State<ChatsListScreen> {
   List<Conversation> _conversations = [];
   bool _isLoading = true;
-  String? _token;
-  String? _currentUserId;
   
   final Map<String, bool> _typingStatus = {};
   
   StreamSubscription? _messageSubscription;
   StreamSubscription? _typingSubscription;
 
+  // ✅ This screen no longer needs hardcoded values
   final String yourComputerIp = "192.168.0.109"; 
-  final String loginMobileNumber = "111";
-  final String loginDisplayName = "Himangshu";
 
   @override
   void initState() {
     super.initState();
-    _loginAndFetchData();
+    // ✅ FIX: Schedule the data fetching to run after the first build is complete.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fetchDataAndConnect();
+    });
   }
 
   @override
@@ -101,48 +107,36 @@ class _ChatsListScreenState extends State<ChatsListScreen> {
     super.dispose();
   }
 
-  Future<void> _loginAndFetchData() async {
+  Future<void> _fetchDataAndConnect() async {
     try {
-      final loginResponse = await http.post(
-        Uri.parse('http://$yourComputerIp:8080/api/auth/login'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({'mobileNumber': loginMobileNumber, 'displayName': loginDisplayName}),
-      );
-      if (loginResponse.statusCode != 200) throw Exception('Failed to log in');
-      
-      final loginData = json.decode(loginResponse.body);
-      final token = loginData['token'];
-      final currentUserId = loginData['userId'];
-      setState(() {
-        _token = token;
-        _currentUserId = currentUserId;
-      });
-
+      // ✅ Use the passed-in token and user ID
       final wsService = context.read<WebSocketService>();
-      wsService.activate(token, yourComputerIp, currentUserId);
-      await wsService.syncInitialPresence(token, yourComputerIp);
+      wsService.activate(widget.token, yourComputerIp, widget.currentUserId);
+      await wsService.syncInitialPresence(widget.token, yourComputerIp);
 
       final convResponse = await http.get(
         Uri.parse('http://$yourComputerIp:8080/api/conversations'),
-        headers: { 'Authorization': 'Bearer $token' },
+        headers: { 'Authorization': 'Bearer ${widget.token}' },
       );
       if (convResponse.statusCode != 200) throw Exception('Failed to load conversations');
       
       final List<dynamic> data = json.decode(convResponse.body);
       final conversations = data.map((json) => Conversation.fromJson(json)).toList();
       
-      setState(() {
-        _conversations = conversations;
-        _isLoading = false;
-      });
-
-      _listenForRealtimeUpdates();
-
+      if (mounted) {
+        setState(() {
+          _conversations = conversations;
+          _isLoading = false;
+        });
+        _listenForRealtimeUpdates();
+      }
     } catch (e) {
-      print("Error during login/fetch: $e");
-      setState(() {
-        _isLoading = false;
-      });
+      print("Error during fetch/connect: $e");
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -186,8 +180,8 @@ class _ChatsListScreenState extends State<ChatsListScreen> {
       MaterialPageRoute(
         builder: (context) => ChatScreen(
           conversation: conversation,
-          currentUserId: _currentUserId,
-          token: _token,
+          currentUserId: widget.currentUserId,
+          token: widget.token,
           yourComputerIp: yourComputerIp,
         ),
       ),
@@ -204,12 +198,16 @@ class _ChatsListScreenState extends State<ChatsListScreen> {
         title: const Text('WhatsApp'),
         elevation: 0,
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 10.0),
-            child: Icon(
-              wsService.isConnected ? Icons.wifi : Icons.wifi_off,
-              color: wsService.isConnected ? Colors.white : Colors.red[300],
-            ),
+          Consumer<WebSocketService>(
+            builder: (context, wsService, child) {
+              return Padding(
+                padding: const EdgeInsets.only(right: 10.0),
+                child: Icon(
+                  wsService.isConnected ? Icons.wifi : Icons.wifi_off,
+                  color: wsService.isConnected ? Colors.white : Colors.red[300],
+                ),
+              );
+            },
           ),
           IconButton(icon: const Icon(Icons.search), onPressed: () {}),
           IconButton(icon: const Icon(Icons.more_vert), onPressed: () {}),
