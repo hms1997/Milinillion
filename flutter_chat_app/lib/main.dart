@@ -6,6 +6,7 @@ import 'chat_screen.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'websocket_service.dart';
 import 'package:provider/provider.dart';
+import 'splash_screen.dart'; // ✅ Import the new splash screen file
 
 // Helper function to format the timestamp
 String formatTimestamp(BuildContext context, DateTime timestamp) {
@@ -60,7 +61,8 @@ class MyApp extends StatelessWidget {
         floatingActionButtonTheme: const FloatingActionButtonThemeData(backgroundColor: Color(0xff25D366)),
       ),
       debugShowCheckedModeBanner: false,
-      home: const ChatsListScreen(),
+      //Set the home property to your new SplashScreen
+      home: const SplashScreen(),
     );
   }
 }
