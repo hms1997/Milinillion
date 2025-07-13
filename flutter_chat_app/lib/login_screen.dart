@@ -108,12 +108,12 @@ class _LoginScreenState extends State<LoginScreen> {
           Positioned(
             top: -60,
             left: -60,
-            child: _buildGlowingCircle(180, Colors.deepPurpleAccent.withOpacity(0.35)),
+            child: _buildGlowingCircle(180, Colors.deepPurpleAccent.withValues(alpha: 0.35)),
           ),
           Positioned(
             bottom: -40,
             right: -40,
-            child: _buildGlowingCircle(120, Colors.blueAccent.withOpacity(0.25)),
+            child: _buildGlowingCircle(120, Colors.blueAccent.withValues(alpha: 0.25)),
           ),
           // Glassmorphism login card
           Center(
@@ -147,17 +147,17 @@ class _LoginScreenState extends State<LoginScreen> {
       width: 370,
       padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 28),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.07),
+        color: Colors.white.withValues(alpha: 0.07),
         borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.25),
+            color: Colors.black.withValues(alpha: 0.25),
             blurRadius: 30,
             offset: const Offset(0, 10),
           ),
         ],
         border: Border.all(
-          color: Colors.white.withOpacity(0.18),
+          color: Colors.white.withValues(alpha: 0.18),
           width: 1.5,
         ),
       ),
@@ -173,7 +173,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.deepPurpleAccent.withOpacity(0.6),
+                  color: Colors.deepPurpleAccent.withValues(alpha: 0.6),
                   blurRadius: 18,
                   spreadRadius: 2,
                 ),
@@ -191,7 +191,7 @@ class _LoginScreenState extends State<LoginScreen> {
           Text(
             'Welcome Back',
             style: TextStyle(
-              color: Colors.white.withOpacity(0.95),
+              color: Colors.white.withValues(alpha: 0.95),
               fontSize: 28,
               fontWeight: FontWeight.bold,
               letterSpacing: 1.2,
@@ -225,36 +225,50 @@ class _LoginScreenState extends State<LoginScreen> {
           SizedBox(
             width: double.infinity,
             height: 52,
-            child: InkWell(
-              onTap: _isLoading ? null : _login,
+            child: Material(
+              color: Colors.transparent,
+              elevation: 8,
               borderRadius: BorderRadius.circular(16),
               child: Ink(
                 decoration: BoxDecoration(
+                  color: Colors.deepPurple[700], // Solid base for contrast
                   gradient: const LinearGradient(
                     colors: [Color(0xFF7F53AC), Color(0xFF647DEE)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                   borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.deepPurpleAccent.withValues(alpha: 0.4),
+                      blurRadius: 16,
+                      offset: Offset(0, 6),
+                    ),
+                  ],
                 ),
-                child: Center(
-                  child: _isLoading
-                      ? const CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                        )
-                      : const Text(
-                          'Login / Register',
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 1.1,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(16),
+                  onTap: _isLoading ? null : _login,
+                  child: Center(
+                    child: _isLoading
+                        ? const CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          )
+                        : const Text(
+                            'Login / Register',
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 1.1,
+                            ),
                           ),
-                        ),
+                  ),
                 ),
               ),
             ),
           ),
+
           const SizedBox(height: 18),
           // Error Message
           if (_errorMessage != null)
@@ -277,9 +291,10 @@ class _LoginScreenState extends State<LoginScreen> {
       controller: controller,
       keyboardType: keyboardType,
       style: const TextStyle(color: Colors.white),
+      cursorColor: Colors.white, // Make cursor visible
       decoration: InputDecoration(
         filled: true,
-        fillColor: Colors.white.withOpacity(0.10),
+        fillColor: Colors.white.withValues(alpha: 0.10),
         hintText: hint,
         hintStyle: const TextStyle(color: Colors.white54),
         prefixIcon: Icon(icon, color: Colors.white70),
