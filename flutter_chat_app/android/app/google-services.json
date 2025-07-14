@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "699172946094",
+    "project_id": "milinillion",
+    "storage_bucket": "milinillion.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:699172946094:android:d74074d41f783a18666d3f",
+        "android_client_info": {
+          "package_name": "com.example.flutter_chat_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCaSwVdkzTpaXURPndMeMNTNrPrIm_YVMk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

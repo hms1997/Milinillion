@@ -3,6 +3,8 @@ plugins {
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
+    // ✅ Add the Google services plugin here
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -37,6 +39,17 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
+}
+
+dependencies {
+    // ... other dependencies like implementation("org.jetbrains.kotlin:kotlin-stdlib:...") will be here
+
+    // ✅ Add the Firebase Bill of Materials (BoM) and other Firebase products here
+    implementation(platform("com.google.firebase:firebase-bom:33.16.0"))
+    implementation("com.google.firebase:firebase-analytics")
+    
+    // For our media messaging feature, we will need Firebase Storage
+    implementation("com.google.firebase:firebase-storage")
 }
 
 flutter {

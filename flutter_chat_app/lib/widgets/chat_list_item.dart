@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import '../models/conversation.dart'; // Import the Conversation model
-import '../screens/chat_screen.dart'; // Import the ChatScreen for navigation
+import '../models/conversation.dart';
+import '../screens/chat_screen.dart';
 
 // Helper function to format the timestamp
 String formatTimestamp(BuildContext context, DateTime timestamp) {
@@ -114,8 +114,9 @@ class ChatListItem extends StatelessWidget {
         ],
       ),
       onTap: () {
-        // The onTap logic now calls the passed-in function first, then navigates.
+        // First, call the passed-in onTap function to reset the unread count
         onTap();
+        // Then, navigate to the ChatScreen
         Navigator.push(
           context,
           MaterialPageRoute(

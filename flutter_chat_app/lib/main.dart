@@ -2,10 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'screens/splash_screen.dart'; // Import the splash screen
 import 'services/websocket_service.dart';
+import 'package:firebase_core/firebase_core.dart';
 
-void main() {
+// ✅ Modify the main function to be async and initialize Firebase
+Future<void> main() async {
+  // Ensure that Flutter's binding is initialized before calling native code
+  WidgetsFlutterBinding.ensureInitialized();
+  // Initialize Firebase
+  await Firebase.initializeApp();
+  
   runApp(
-    // The Provider makes the WebSocketService available to the entire app
     ChangeNotifierProvider(
       create: (context) => WebSocketService(),
       child: const MyApp(),

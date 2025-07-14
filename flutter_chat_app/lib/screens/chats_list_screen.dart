@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import '../models/conversation.dart';
 import '../services/websocket_service.dart';
-import '../widgets/chat_list_item.dart';
+import '../widgets/chat_list_item.dart'; // ✅ FIX: Import the new widget file
 
 class ChatsListScreen extends StatefulWidget {
   final String token;
@@ -23,8 +23,9 @@ class _ChatsListScreenState extends State<ChatsListScreen> {
   
   StreamSubscription? _messageSubscription;
   StreamSubscription? _typingSubscription;
+  StreamSubscription? _presenceSubscription;
 
-  final String yourComputerIp = "192.168.0.109"; 
+  final String yourComputerIp = "192.168.0.112"; 
 
   @override
   void initState() {
@@ -38,14 +39,23 @@ class _ChatsListScreenState extends State<ChatsListScreen> {
   void dispose() {
     _messageSubscription?.cancel();
     _typingSubscription?.cancel();
+    _presenceSubscription?.cancel();
     super.dispose();
   }
 
-  Future<void> _fetchDataAndConnect() async {
+  Future<void> _fetchDataAndConnect({bool isRefresh = false}) async {
+    if (!isRefresh) {
+      setState(() {
+        _isLoading = true;
+      });
+    }
+
     try {
       final wsService = context.read<WebSocketService>();
-      wsService.activate(widget.token, yourComputerIp, widget.currentUserId);
-      await wsService.syncInitialPresence(widget.token, yourComputerIp);
+      if (!wsService.isConnected) {
+        wsService.activate(widget.token, yourComputerIp, widget.currentUserId);
+        await wsService.syncInitialPresence(widget.token, yourComputerIp);
+      }
 
       final convResponse = await http.get(
         Uri.parse('http://$yourComputerIp:8080/api/conversations'),
@@ -61,7 +71,9 @@ class _ChatsListScreenState extends State<ChatsListScreen> {
           _conversations = conversations;
           _isLoading = false;
         });
-        _listenForRealtimeUpdates();
+        if (!isRefresh) {
+          _listenForRealtimeUpdates();
+        }
       }
     } catch (e) {
       print("Error during fetch/connect: $e");
@@ -78,7 +90,7 @@ class _ChatsListScreenState extends State<ChatsListScreen> {
 
     _messageSubscription = wsService.messageStream.listen((messageData) {
       final senderId = messageData['senderId'];
-      final content = messageData['content'];
+      final content = messageData['caption'] ?? '[Image]';
       final index = _conversations.indexWhere((c) => c.contactId == senderId);
       if (index != -1) {
         setState(() {
@@ -99,6 +111,12 @@ class _ChatsListScreenState extends State<ChatsListScreen> {
         _typingStatus[senderId] = isTyping;
       });
     });
+
+    _presenceSubscription = wsService.presenceStream.listen((_) {
+      if (mounted) {
+        setState(() {});
+      }
+    });
   }
   
   void _onConversationTapped(Conversation conversation) {
@@ -108,7 +126,6 @@ class _ChatsListScreenState extends State<ChatsListScreen> {
         _conversations[index].unreadCount = 0;
       });
     }
-    // Navigation is now handled inside the ChatListItem widget
   }
 
   @override
@@ -137,23 +154,26 @@ class _ChatsListScreenState extends State<ChatsListScreen> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              itemCount: _conversations.length,
-              itemBuilder: (context, index) {
-                final conversation = _conversations[index];
-                final isTyping = _typingStatus[conversation.contactId] ?? false;
-                final isOnline = wsService.onlineUserIds.contains(conversation.contactId);
-                
-                return ChatListItem(
-                  conversation: conversation,
-                  isTyping: isTyping,
-                  isOnline: isOnline,
-                  onTap: () => _onConversationTapped(conversation),
-                  currentUserId: widget.currentUserId,
-                  token: widget.token,
-                  yourComputerIp: yourComputerIp,
-                );
-              },
+          : RefreshIndicator(
+              onRefresh: () => _fetchDataAndConnect(isRefresh: true),
+              child: ListView.builder(
+                itemCount: _conversations.length,
+                itemBuilder: (context, index) {
+                  final conversation = _conversations[index];
+                  final isTyping = _typingStatus[conversation.contactId] ?? false;
+                  final isOnline = wsService.onlineUserIds.contains(conversation.contactId);
+                  
+                  return ChatListItem(
+                    conversation: conversation,
+                    isTyping: isTyping,
+                    isOnline: isOnline,
+                    onTap: () => _onConversationTapped(conversation),
+                    currentUserId: widget.currentUserId,
+                    token: widget.token,
+                    yourComputerIp: yourComputerIp,
+                  );
+                },
+              ),
             ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {},
